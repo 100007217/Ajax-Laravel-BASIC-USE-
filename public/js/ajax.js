@@ -45,6 +45,7 @@ function leerJS() {
                 recarga += '<td>' + respuesta[i].id + '</td>'
                 recarga += '<td>' + respuesta[i].nombre + '</td>'
                 recarga += '<td><img src="storage/' + respuesta[i].foto + '" style="width:15px;"></td>'
+                recarga += '<td><button onclick="eliminarJS(' + respuesta[i].id + '); return false;">Eliminar</button>';
                 recarga += '</tr>';
             }
             tabla.innerHTML = recarga;
@@ -77,6 +78,36 @@ function insertarJS() {
                 document.getElementById('mensaje').innerHTML = "Inserción correcta."
             } else {
                 document.getElementById('mensaje').innerHTML = "Fallo en la inserción: " + respuesta.resultado;
+            }
+            leerJS();
+        }
+    }
+
+    ajax.send(formData);
+}
+
+function eliminarJS(id_usu) {
+    /* Si hace falta obtenemos el elemento HTML donde introduciremos la recarga (datos o mensajes) */
+    /* Usar el objeto FormData para guardar los parámetros que se enviarán:
+       formData.append('clave', valor);
+       valor = elemento/s que se pasarán como parámetros: token, method, inputs... */
+    var formData = new FormData();
+    formData.append('_token', document.getElementById('token').getAttribute("content"));
+    formData.append('_method', 'DELETE');
+    //formData.append('registro', id_usu);
+
+    /* Inicializar un objeto AJAX */
+    var ajax = objetoAjax();
+
+    ajax.open("POST", "eliminar/" + id_usu, true);
+    ajax.onreadystatechange = function() {
+        if (ajax.readyState == 4 && ajax.status == 200) {
+            var respuesta = JSON.parse(this.responseText);
+            /* Leerá la respuesta que es devuelta por el controlador: */
+            if (respuesta.resultado == 'OK') {
+                document.getElementById('mensaje').innerHTML = "Eliminación correcta."
+            } else {
+                document.getElementById('mensaje').innerHTML = "Fallo en la eliminación: " + respuesta.resultado;
             }
             leerJS();
         }

@@ -22,4 +22,12 @@ class UsuarioController extends Controller
             return response()->json(array('resultado'=> 'NOK: '.$th->getMessage()));
         }
     }
+    public function eliminarController($id){
+        try {
+            DB::delete('delete from tbl_users where id = '.$id.'');
+            return response()->json(array('resultado'=> 'OK')); 
+        } catch (\Throwable $th) {
+            return response()->json(array('resultado'=> 'NOK: '.$th->getMessage()));
+        }
+    }
 }

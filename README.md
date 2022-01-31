@@ -1,66 +1,242 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+### Pasos para la descarga y prueba de la aplicación:
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+1. clonar el repositorio
 
-## About Laravel
+2. instalar las dependencias que faltan mediante el comando `composer install`
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+   > puede que, por problemas de compatibilidad, nos pida correr el comando`composer update`
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+3. crear el fichero `.env` en el directorio principal del proyecto con el contenido pertinente
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+   > se puede utilizar el fichero `.env.example` para generar el nuevo `.env`
 
-## Learning Laravel
+4. finalmente, Laravel puede pedir que se ejecute el comando `php artisan key:generate` para generar una nueva variable de entorno APP_KEY
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+5. crear la base de datos mediante migraciones o manualmente (este proyecto utiliza migraciones, se ha de correr el comando `php artisan migrate` para generar la migración)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Agregar AJAX al desarrollo
 
-## Laravel Sponsors
+AJAX se utiliza para hacer que una parte de la layout de una web recarge su contenido sin la necesitad de recargar la página entera.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+La idea es agregar AJAX a las funciones o métodos que generan un cambio (o recarga) en el contenido de la tabla con registros. Podemos observar que los registros de la tabla cambian cada vez que filtramos y/o cada vez que eliminamos un registro.
 
-### Premium Partners
+**Todas las funciones AJAX que definiremos en Laravel serán POST**
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[CMS Max](https://www.cmsmax.com/)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
-- **[Romega Software](https://romegasoftware.com)**
+1. Crearemos un fichero js en la ruta `pubic/js/ajax.js`
 
-## Contributing
+2. Enlazaremos el fichero js en la vista que lo utilice, en este caso en la vista `clientes/index.blade.php`
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+   > el código que se utiliza para enlazar el fichero js es: `<script src="js/ajax.js"></script>`
 
-## Code of Conduct
+   > COMPROBAMOS QUE EL FICHERO JS ESTÁ BIEN ENLAZADO AGREGANDO UN `alert('random');`
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+3. También hay que agregar en el apartado del `head` el siguiente meta: `<meta name="csrf-token" id="token" content="{{ csrf_token() }}">`
 
-## Security Vulnerabilities
+   > este requerimiento es obligatorio al utilizar Laravel + AJAX ya que al renderizar un formulario con js no es posible compilar el método `@csrf`(mirar punto 5.)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+   - Referencia: https://laravel.com/docs/8.x/csrf
 
-## License
+4. Objeto AJAX:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+   ``` js
+   function objetoAjax() {
+      var xmlhttp = false;
+      try {
+         xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+      } catch (e) {
+         try {
+            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+         } catch (E) {
+            xmlhttp = false;
+         }
+      }
+      if (!xmlhttp && typeof XMLHttpRequest != 'undefined') {
+         xmlhttp = new XMLHttpRequest();
+      }
+      return xmlhttp;
+   }
+   ```
+
+5. **index.blade.php**
+
+   Transcribimos todos los formuluarios para que se adapten a AJAX. Esto lo hacemos ya que javascript no compila código php ni código blade (https://laravel.com/docs/master/routing#form-method-spoofing)
+
+   - ~@csrf~ -> meta de token - si el formulario utiliza AJAX (ver apartado 3.)
+   
+   - ~@csrf~ -> `<input type="hidden" name="_token" value="{{ csrf_token() }}" />` - si el formulario NO utiliza AJAX
+   
+   - ~{{method_field('GET')}}~ -> `<input type="hidden" name="_method" value="GET">`
+
+   - ~{{method_field('POST')}}~ -> `<input type="hidden" name="_method" value="POST">`
+
+   - ~{{method_field('PUT')}}~ -> `<input type="hidden" name="_method" value="PUT">`
+
+   - ~{{method_field('DELETE')}}~ -> `<input type="hidden" name="_method" value="DELETE">`
+
+   - si el formulario utiliza AJAX:
+   
+     - no es nesesario utilizar el atributo `action`
+
+      ```php
+      {{-- Buscador (filtro) --}}
+      <form method="post">
+         <input type="hidden" name="_method" value="POST" id="postFiltro">
+         <div class="form-outline">
+            <input type="search" id="" name="nombre" class="form-control" placeholder="Buscar por nombre..." aria-label="Search" />
+         </div>
+      </form>
+
+      /*......*/
+
+      {{-- Eliminar cliente --}}
+      <form method="post">
+         <input type="hidden" name="_method" value="DELETE" id="deleteCliente">
+         <button class= "btn btn-danger" type="submit" value="Delete">Eliminar</button>
+      </form>
+      ```
+
+   - si el formulario NO utiliza AJAX
+      ```PHP
+      {{-- Editar cliente --}}
+      <form action="{{route('clientes.edit',['cliente'=>$cliente->id])}}" method="post">
+         <input type="hidden" name="_token" value="{{ csrf_token() }}" />
+         <input type="hidden" name="_method" value="GET">
+         <button class= "btn btn-secondary" type="submit" value="Edit">Editar</button>
+      </form>
+      ```
+
+6. Filtro implementado con AJAX
+
+   **ClienteController.php**
+
+   - la función ha de devolver registros en formato JSON (JavaScript Object Notation)
+
+      ```php
+      public function shows(Request $request)
+      {
+         $clientes=DB::select('select * from clientes where nombre like ?',['%'.$request->input('nombre').'%']);
+         // return view('clientes.index', compact('clientes'));
+
+         return response()->json($clientes);
+      }
+      ```
+
+   **index.blade.php**
+
+   - asociamos un evento y una función js al input/button, por ejemplo `onkeyup="filtro(); return false;"`
+
+   **pubic/js/ajax.js**
+
+   - Creamos la función `filtro`:
+
+      ```js
+      /* Función para filtrar recursos implementada con AJAX */
+      function filtro() {
+         /* Obtener elemento html donde introduciremos la recarga (datos o mensajes) */
+
+         /* 
+         Obtener elemento/s que se pasarán como parámetros: token, method, inputs... 
+         var token = document.getElementById('token').getAttribute("content");
+
+         Usar el objeto FormData para guardar los parámetros que se enviarán:
+         var formData = new FormData();
+         formData.append('_token', token);
+         formData.append('clave', valor);
+         */
+
+         /* Inicializar un objeto AJAX */
+         var ajax = objetoAjax();
+         /*
+         ajax.open("method", "rutaURL", true);
+         GET  -> No envía parámetros
+         POST -> Sí envía parámetros
+         true -> asynchronous
+         */
+         ajax.open("POST", "clientes/shows", true);
+         ajax.onreadystatechange = function() {
+            if (ajax.readyState == 4 && ajax.status == 200) {
+               var respuesta = JSON.parse(this.responseText);
+               /* Crear la estructura html que se devolverá dentro de una variable recarga*/
+               var recarga = '';
+                  /* creación de estructura: la estructura que creamos no ha de contener código php ni código blade*/
+                  /* utilizamos innerHTML para introduciremos la recarga en el elemento html pertinente */
+            }
+         }
+         /*
+         send(string)->Sends the request to the server (used for POST)
+         */
+         ajax.send(formData)
+      }
+      ```
+
+7. Botón eliminar implementado con AJAX
+
+   **ClienteController.php**
+
+   - la función ha de devolver registros en formato JSON (JavaScript Object Notation)
+
+      ```php
+      public function destroy(Cliente $cliente)
+      {
+         try {
+               DB::delete('delete from clientes where id=?',[$cliente->id]);
+               //return redirect()->route('clientes.index');
+
+               return response()->json(array('resultado'=> 'OK'));
+         } catch (\Throwable $th) {
+               return response()->json(array('resultado'=> 'NOK: '.$th->getMessage()));
+         }
+      }
+      ```
+
+   **index.blade.php**
+
+   - asociamos un evento y una función js al input/button, por ejemplo `onclick="eliminar(id); return false;"`
+
+   **pubic/js/ajax.js**
+
+   - Creamos la función `eliminar`
+
+      ```js
+      /* Función para filtrar recursos implementada con AJAX */
+      function eliminar(cliente_id) {
+         /* Obtener elemento html donde introduciremos la recarga (datos o mensajes) */
+
+         /* 
+         Obtener elemento/s que se pasarán como parámetros: token, method, inputs... 
+         var token = document.getElementById('token').getAttribute("content");
+
+         Usar el objeto FormData para guardar los parámetros que se enviarán:
+         var formData = new FormData();
+         formData.append('_token', token);
+         formData.append('clave', valor);
+         */
+
+         /* Inicializar un objeto AJAX */
+         var ajax = objetoAjax();
+         /*
+         ajax.open("method", "rutaURL", true);
+         GET  -> No envía parámetros
+         POST -> Sí envía parámetros
+         true -> asynchronous
+         */
+         ajax.open("POST", "clientes/"+cliente_id, true);
+         ajax.onreadystatechange = function() {
+            if (ajax.readyState == 4 && ajax.status == 200) {
+                  var respuesta = JSON.parse(this.responseText);
+                  if (respuesta.resultado == "OK") {
+                     /* creación de estructura: la estructura que creamos no ha de contener código php ni código blade*/
+                     /* utilizamos innerHTML para introduciremos la recarga en el elemento html pertinente */
+                  } else {
+                     /* creación de estructura: la estructura que creamos no ha de contener código php ni código blade*/
+                     /* utilizamos innerHTML para introduciremos la recarga en el elemento html pertinente */
+                  }
+                  filtro();
+            }
+         }
+         /*
+         send(string)->Sends the request to the server (used for POST)
+         */
+         ajax.send(formData)
+      }
+      ```

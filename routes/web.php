@@ -14,3 +14,5 @@ Route::post('leer',[UsuarioController::class, 'leerController']);
 
 // ruta para insertar
 Route::post('crear',[UsuarioController::class, 'crearController']);
+
+Route::delete('eliminar/{id}',[UsuarioController::class, 'eliminarController']);
