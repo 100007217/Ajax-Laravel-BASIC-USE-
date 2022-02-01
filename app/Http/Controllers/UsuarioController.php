@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Usuario;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 use Illuminate\Support\Facades\DB;
 
@@ -31,9 +32,34 @@ class UsuarioController extends Controller
         }
     }
     public function editarController(Request $request){
+/*
+        try {
+            if ($request->hasFile('foto_file')) {
+                $foto = DB::table('tbl_users')->select('foto')->where('id','=',$request['id'])->first();          
+                if ($foto->foto_persona != null) {
+                    Storage::delete('public/'.$foto->foto); 
+                }
+            $foto=$request->file('foto_file')->store('uploads','public');
+            }else{}
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
+
+        /*
+
+        }else{
+            $foto = DB::table('tbl_persona')->select('foto_persona')->where('id','=',$request['id'])->first();
+            $datos['foto_persona'] = $foto->foto_persona;
+        }
+*/ 
+
         $id=$request['id'];
         $nombre=$request['nombre'];
         if(isset($request['foto_file'])){
+            $foto = DB::table('tbl_users')->select('foto')->where('id','=',$request['id'])->first();          
+                if ($foto->foto != null) {
+                    Storage::delete('public/'.$foto->foto); 
+                }
             $foto=$request->file('foto_file')->store('uploads','public');
         }else{
             $foto=$request['foto'];
