@@ -30,4 +30,21 @@ class UsuarioController extends Controller
             return response()->json(array('resultado'=> 'NOK: '.$th->getMessage()));
         }
     }
+    public function editarController(Request $request){
+        $id=$request['id'];
+        $nombre=$request['nombre'];
+        if(isset($request['foto_file'])){
+            $foto=$request->file('foto_file')->store('uploads','public');
+        }else{
+            $foto=$request['foto'];
+        }
+
+        try {
+            //UPDATE `tbl_users` SET `id` = NULL, `nombre` = 'admin7' WHERE `tbl_users`.`id` = 22;
+            DB::update('update tbl_users set nombre = ?,foto=? where id = ?',[$nombre,$foto,$id]);
+            return response()->json(array('resultado'=> 'OK')); 
+        } catch (\Throwable $th) {
+            return response()->json(array('resultado'=> 'NOK: '.$th->getMessage()));
+        }
+    }
 }

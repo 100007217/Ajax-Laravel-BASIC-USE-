@@ -16,3 +16,5 @@ Route::post('leer',[UsuarioController::class, 'leerController']);
 Route::post('crear',[UsuarioController::class, 'crearController']);
 
 Route::delete('eliminar/{id}',[UsuarioController::class, 'eliminarController']);
+
+Route::put('editar',[UsuarioController::class, 'editarController']);
